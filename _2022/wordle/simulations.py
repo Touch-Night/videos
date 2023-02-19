@@ -751,21 +751,20 @@ def simulate_games(first_guess=None,
                    results_file=None,
                    next_guess_map_file=None,
                    quiet=False,
-                   ):
+                   first_answer=None):
     all_words = get_word_list(short=False)
     short_word_list = get_word_list(short=True)
 
     if first_guess is None:
         first_guess = optimal_guess(
-            all_words, all_words, priors,
-            **choice_config
+            all_words, all_words, priors
         )
 
     if priors is None:
         priors = get_frequency_based_priors()
 
     if test_set is None:
-        test_set = short_word_list
+        test_set = all_words
 
     if shuffle:
         random.shuffle(test_set)
@@ -806,7 +805,7 @@ def simulate_games(first_guess=None,
     # and keep track of the stats.
     scores = np.zeros(0, dtype=int)
     game_results = []
-    for answer in ProgressDisplay(test_set, leave=False, desc=" Trying all wordle answers"):
+    for first_guess in ProgressDisplay(test_set, leave=False, desc=" Trying all wordle guesses"):
         guesses = []
         patterns = []
         possibility_counts = []
@@ -816,6 +815,7 @@ def simulate_games(first_guess=None,
             possibilities = list(filter(lambda w: w not in seen, possibilities))
 
         score = 1
+        answer = first_answer
         guess = first_guess
         while guess != answer:
             pattern = get_pattern(guess, answer)
@@ -884,12 +884,12 @@ def simulate_games(first_guess=None,
 
 
 if __name__ == "__main__":
-    first_guess = "salet"
+    first_answer = "extra"
     results, decision_map = simulate_games(
-        first_guess=first_guess,
+        first_answer = first_answer,
         priors=get_true_wordle_prior(),
         optimize_for_uniform_distribution=True,
         # shuffle=True,
         # brute_force_optimize=True,
-        # hard_mode=True,
+        #hard_mode=True,
     )
